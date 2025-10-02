@@ -1,0 +1,76 @@
+#Obsolète
+#version: '3.8'
+
+services:
+  #Nom du service dans le réseau Docker (utilisé par la migration)
+  #1. Le service de base de données MongoDB
+  mongodb: 
+    image: mongo:latest
+    #Configuration recommandée :
+    container_name: mongodb_ai9002
+    restart: always
+    
+    ports:
+      #Port local (votre machine) : Port interne du conteneur
+      #27017:27017 est la convention la plus courante
+      - "27017:27017" 
+    #Stocke les données de MongoDB sur votre machine locale pour la persistance
+    volumes:
+      - mongo_data:/data/db #Pour la persistance des données
+
+    #attendre que MongoDB soit non seulement démarré, mais aussi signalé comme sain
+    healthcheck:
+      #test: ["CMD", "mongo", "--quiet", "--eval", "db.runCommand({ping: 1})"]
+      #Utilise le code de sortie 0 de l'outil 'mongod' lui-même
+      #pour vérifier s'il est prêt (en écoutant le port).
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--port", "27017"]      
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s # Temps initial pour le démarrage
+
+      
+    #Ajout des variables d'environnement de sécurité (Meilleure pratique)
+    #environment:
+      #- MONGO_INITDB_ROOT_USERNAME=user
+      #- MONGO_INITDB_ROOT_PASSWORD=password
+  #2. Le service de migration de données (votre script Python)
+  #Nom du service
+  app:
+    #Indique à Docker Compose de construire l'image à partir du Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: migration_app
+    #Le conteneur ne se relance pas après l'exécution du script de migration
+    restart: "no"
+    depends_on:
+      #S'assure que le service 'db' est démarré avant de lancer le script
+      #- mongodb
+      #CORRECTION : Le nom du service 'mongodb' devient la clé.
+      mongodb: #<-- PAS de tiret ici. 'mongodb' est une clé.
+          #attendre que MongoDB soit non seulement démarré, mais aussi signalé comme sain
+          condition: service_healthy #<-- Attendre que la DB soit saine et 'condition' est une propriété de cette clé 'mongodb'.
+          
+    environment:
+      #Configure l'URL de connexion MongoDB pour qu'elle utilise le nom du service (db)
+      MONGO_URI: "mongodb://mongodb:27017/"
+      #Configure le chemin du fichier CSV dans le conteneur
+      CSV_FILE_PATH: "/data/healthcare_dataset.csv"
+      
+    volumes:
+      #Montage du volume : Remplacez le chemin local par le chemin réel vers votre dossier P5_data
+      #L'emplacement local (à gauche du :) est le dossier contenant 'healthcare_dataset.csv'.
+      #Exemple : /home/ai9002/Desktop/.../P5_Docker/P5_data
+      #ATTENTION : Remplacez le chemin de l'hôte (HOST_PATH) ci-dessous par votre chemin réel.
+      #Encadrez le chemin de l'hôte entre guillemets doubles
+      - "/home/ai9002/Desktop/Archives PC Mac/Formations Openclassrooms/Projet5 - Maintenez et documentez un système de stockage des données sécurisé et performant - 40 heures/P5_Docker/P5_data:/data"
+      
+    #Exécute la commande par défaut de l'image (CMD du Dockerfile)
+    command: ["python", "P5_sources_pytest/migration_script.py"]
+
+      
+#Définition des volumes nommés
+volumes:
+  mongo_data:
+    driver: local

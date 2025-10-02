@@ -1,0 +1,19 @@
+Phase 2 : Conteneurisation et Orchestration (Portabilité et Déploiement)
+Cette phase permet de rendre la solution complète, reproductible, et prête pour le déploiement sur n'importe quel serveur (y compris AWS).
+Étape 2.1 : Dockerisation des Services
+Dockerfile MongoDB : Utiliser l'image mongo officielle.
+Dockerfile de Migration : Créer un Dockerfile pour le script Python (installation de Python, requirements.txt/Poetry, copie du code).
+Étape 2.2 : Orchestration avec Docker Compose
+Fichier docker-compose.yml : Définir les deux (ou trois) services :
+mongodb: La base de données.
+migration: Le service Python qui s'exécute pour effectuer la migration.
+Gestion des Volumes : Définir les volumes pour la persistance des données MongoDB (mongo_data) et monter les sources (le dossier P5_data/ contenant le CSV).
+Définition des Rôles et Authentification : Configurer les variables d'environnement dans le docker-compose.yml pour l'utilisateur, le mot de passe et la base de données MongoDB (sécurité de base).
+Étape 2.3 : Validation Docker et Documentation Finale
+Test d'Exécution : Lancer l'ensemble du système avec docker compose up pour garantir que la migration s'exécute correctement et que les données sont insérées dans le volume persistant.
+Système d'Authentification : Décrire précisément le système d'authentification mis en place dans le conteneur (utilisateur/rôles).
+Versionnement et Documentation (GitHub) : Versionner le travail sur GitHub et rédiger un README détaillé incluant :
+Contexte de la mission.
+Schéma de la base de données.
+Instructions pour lancer la migration (docker compose up).
+Système d'authentification et rôles créés.
