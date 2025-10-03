@@ -13,7 +13,10 @@ services:
     ports:
       #Port local (votre machine) : Port interne du conteneur
       #27017:27017 est la convention la plus courante
-      - "27017:27017" 
+      #- "27017:27017"
+      # Nous changeons le port hôte (à gauche) à 27018 suite à un conflit de port avec la version locale d'un mongodb
+      # Nous changeons le port hôte (à gauche) à 27018
+      - "27018:27017" # <-- MODIFICATION ICI      
     #Stocke les données de MongoDB sur votre machine locale pour la persistance
     volumes:
       - mongo_data:/data/db #Pour la persistance des données
@@ -59,12 +62,13 @@ services:
       CSV_FILE_PATH: "/data/healthcare_dataset.csv"
       
     volumes:
+      - ./P5_data:/data
       #Montage du volume : Remplacez le chemin local par le chemin réel vers votre dossier P5_data
       #L'emplacement local (à gauche du :) est le dossier contenant 'healthcare_dataset.csv'.
       #Exemple : /home/ai9002/Desktop/.../P5_Docker/P5_data
       #ATTENTION : Remplacez le chemin de l'hôte (HOST_PATH) ci-dessous par votre chemin réel.
-      #Encadrez le chemin de l'hôte entre guillemets doubles
-      - "/home/ai9002/Desktop/Archives PC Mac/Formations Openclassrooms/Projet5 - Maintenez et documentez un système de stockage des données sécurisé et performant - 40 heures/P5_Docker/P5_data:/data"
+      #Encadrez le chemin de l'hôte entre guillemets doubles : il faudra changer cela
+      #- "/home/ai9002/Desktop/Archives PC Mac/Formations Openclassrooms/Projet5 - Maintenez et documentez un système de stockage des données sécurisé et performant - 40 heures/P5_Docker/P5_data/projet5_OCR:/data"
       
     #Exécute la commande par défaut de l'image (CMD du Dockerfile)
     command: ["python", "P5_sources_pytest/migration_script.py"]
