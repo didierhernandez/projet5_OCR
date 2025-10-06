@@ -30,8 +30,13 @@ services:
       retries: 5
       start_period: 30s # Temps initial pour le démarrage
 
+    #définition du réseaux local virtuel Docker utilisé
+    networks:
+      - mongo_network
+
       
     #Ajout des variables d'environnement de sécurité (Meilleure pratique)
+    #Fait dans le service mongo-express ...
     #environment:
       #- MONGO_INITDB_ROOT_USERNAME=user
       #- MONGO_INITDB_ROOT_PASSWORD=password
@@ -62,10 +67,14 @@ services:
     volumes:
       #Montage du volume pour mongodb
       - ./P5_data:/data
-      
-      
+            
     #Exécute la commande par défaut de l'image (CMD du Dockerfile)
     command: ["python", "P5_sources_pytest/migration_script.py"]
+
+    #définition du réseaux local virtuel Docker utilisé
+    networks:
+      - mongo_network
+
 
   #3. Le service d'interface web de gestion de la base de données MongoDB
   #mongo-express sera accessible sur ​http://localhost:8081
@@ -82,8 +91,17 @@ services:
       ME_CONFIG_BASICAUTH_PASSWORD: admin
     depends_on:
       - mongodb
+
+    #définition du réseaux local virtuel Docker utilisé
+    networks:
+      - mongo_network
       
 #Définition des volumes nommés
 volumes:
   mongo_data:
     driver: local
+
+#Définition des réseaux locaux virtuels nommés
+networks:
+  mongo_network:
+    driver: bridge
