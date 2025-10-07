@@ -1,7 +1,6 @@
 
 services:
-  #Nom des services dans le réseau Docker (utilisé par la migration et le reste)
-  
+  #Nom du service dans le réseau Docker (utilisé par la migration)
   #1. Le service de base de données MongoDB
   mongodb: 
     image: mongo:latest
@@ -14,12 +13,12 @@ services:
       #27017:27017 est la convention la plus courante
       #- "27017:27017"
       #Nous changeons le port hôte (à gauche) à 27018 suite à un conflit de port avec la version locale d'un mongodb
+      #Nous changeons le port hôte (à gauche) à 27018
       - "27018:27017" # <-- MODIFICATION ICI      
-    #Stocke les données de MongoDB sur votre machine locale pour la persistance et montage de la configuration des roles utilisateurs
+    #Stocke les données de MongoDB sur votre machine locale pour la persistance
     volumes:
       - mongo_data:/data/db #Pour la persistance des données
-      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro #Configuration des roles utilisateurs du fichier init-mongo.js
-      
+
     #attendre que MongoDB soit non seulement démarré, mais aussi signalé comme sain
     healthcheck:
       #test: ["CMD", "mongo", "--quiet", "--eval", "db.runCommand({ping: 1})"]
@@ -30,21 +29,17 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s # Temps initial pour le démarrage
-      
-    #Ajout des variables d'environnement de sécurité (Meilleure pratique)
-    environment:
-      #Ces variables ne créent PAS d'utilisateurs, elles permettent à 'init-mongo.js' de créer 
-      #le root user, et forcent MongoDB à démarrer avec l'authentification activée.
-      #Si vous utilisez déjà le fichier init-mongo.js pour créer l'utilisateur admin, vous devez toujours définir ces variables dans
-      #l'environnement. C'est la façon dont l'image Docker de MongoDB sait quel utilisateur utiliser pour créer le premier utilisateur
-      #admin ou activer l'authentification.
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
 
     #définition du réseaux local virtuel Docker utilisé
     networks:
       - mongo_network
-  
+
+      
+    #Ajout des variables d'environnement de sécurité (Meilleure pratique)
+    #Fait dans le service mongo-express ...
+    #environment:
+      #- MONGO_INITDB_ROOT_USERNAME=user
+      #- MONGO_INITDB_ROOT_PASSWORD=password
   #2. Le service de migration de données (votre script Python)
   #Nom du service
   app:
@@ -65,13 +60,7 @@ services:
           
     environment:
       #Configure l'URL de connexion MongoDB pour qu'elle utilise le nom du service (db)
-      #MONGO_URI: "mongodb://mongodb:27017/"
-      #Configure l'URL de connexion MongoDB pour qu'elle utilise le nom du service (db) et se connecte à la bd test2 avec le rôle de date_migrator
-      #MONGO_URI: "mongodb://data_migrator:data_migrator@mongodb:27017/test2"
-      # URI de connexion corrigée pour la migration
-      MONGO_URI: "mongodb://data_migrator:data_migrator@mongodb:27017/test2?authSource=admin"
-      #MONGO_URI: "mongodb://admin:admin@mongodb:27017/test2?authSource=admin"
-
+      MONGO_URI: "mongodb://mongodb:27017/"
       #Configure le chemin du fichier CSV dans le conteneur
       CSV_FILE_PATH: "/data/healthcare_dataset.csv"
       
@@ -81,13 +70,11 @@ services:
             
     #Exécute la commande par défaut de l'image (CMD du Dockerfile)
     command: ["python", "P5_sources_pytest/migration_script.py"]
-    #Exécute la commande par défaut de l'image (CMD du Dockerfile) avec 10 secondes de décalage 
-    #suite à problèmes d'authentification lors du lancement de l'app
-    #command: ["sh", "-c", "sleep 30 && python P5_sources_pytest/migration_script.py"]
 
     #définition du réseaux local virtuel Docker utilisé
     networks:
       - mongo_network
+
 
   #3. Le service d'interface web de gestion de la base de données MongoDB
   #mongo-express sera accessible sur ​http://localhost:8081
@@ -98,18 +85,10 @@ services:
     ports:
       - "8081:8081"
     environment:
-      #L'URI de connexion complète pour l'accès interne
-      ME_CONFIG_MONGODB_URL: mongodb://admin:admin@mongodb:27017/admin
-      
-      #Les variables suivantes deviennent redondantes avec l'URI complète, 
-      #mais on peut les laisser pour plus de clarté
-      #ME_CONFIG_MONGODB_SERVER: mongodb
-      #ME_CONFIG_MONGODB_PORT: 27017
-      
-      # Ces variables ne sont que pour l'authentification à l'interface WEB de Mongo Express
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: admin
-
     depends_on:
       - mongodb
 

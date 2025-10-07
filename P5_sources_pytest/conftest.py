@@ -25,7 +25,12 @@ COLLECTION_NAME = os.getenv('MONGO_COLLECTION_NAME', 'patients')
 #Le chemin commence à la racine du projet où la commande 'poetry run' est lancée.
 #DATA_PATH = "P5_data/healthcare_dataset.csv"
 DATA_PATH = os.getenv('CSV_FILE_PATH', 'P5_data/healthcare_dataset.csv') 
-# L'URI doit être lue depuis une variable d'environnement (MONGO_URI)
+
+# Pour exécuter les tests localement contre le conteneur Docker : à approfondir ?
+#export MONGO_URI="mongodb://data_migrator:data_migrator@localhost:27018/test2?authSource=admin"
+#pytest
+
+# L'URI doit être lue depuis une variable d'environnement (MONGO_URI) : à vérifier lorsque on réalise les tests localement ?
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/') 
 
 

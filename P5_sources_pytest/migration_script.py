@@ -11,6 +11,27 @@ import os
 ####les fichiers .py sont les mêmes
 ####l'enjeux est dans dockerfile et dockercompose
 from pymongo import MongoClient
+from pymongo.errors import OperationFailure, ConnectionFailure 
+
+def connect_to_mongodb_with_retry(uri, max_retries=10, delay_seconds=5):
+    """Tente de se connecter et de s'authentifier à MongoDB avec des réessais."""
+    for attempt in range(max_retries):
+        try:
+            client = MongoClient(uri, serverSelectionTimeoutMS=5000) # Augmente la patience du client
+            
+            # Tente une opération qui nécessite l'authentification (comme 'ping' sur la base 'admin')
+            client.admin.command('ping') 
+            
+            print(f"Connexion et Authentification à MongoDB réussies après {attempt + 1} tentative(s).")
+            return client
+        except (OperationFailure, ConnectionFailure) as e:
+            # L'erreur 18 est OperationFailure
+            print(f"Échec de l'authentification/connexion (Tentative {attempt + 1}/{max_retries}). Réessaie dans {delay_seconds}s...")
+            if attempt + 1 == max_retries:
+                # Si toutes les tentatives échouent, levez l'erreur.
+                raise Exception(f"Échec de l'authentification : {e}")
+            time.sleep(delay_seconds)
+    return None
 
 #paramètres : Chemin dans le conteneur à gérer différemment !!!!!!!!!!!!
 #DATA_PATH = "/P5_data/healthcare_dataset.csv" # Chemin dans le conteneur à gérer différemment !!!!!!!!!!!!
@@ -19,7 +40,12 @@ from pymongo import MongoClient
 #DATA_PATH = "P5_data/healthcare_dataset.csv"
 DATA_PATH = os.getenv('CSV_FILE_PATH', 'P5_data/healthcare_dataset.csv') 
 # L'URI doit être lue depuis une variable d'environnement (MONGO_URI)
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/') 
+#MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/') 
+# MAINTENANT : Supprimez la valeur par défaut pour forcer l'utilisation de la variable d'environnement du conteneur
+MONGO_URI = os.getenv('MONGO_URI') 
+if not MONGO_URI:
+    raise ValueError("MONGO_URI n'est pas défini dans les variables d'environnement.")
+
  
 DATE_FORMAT = '%Y-%m-%d' #Format des dates dans le CSV, ex: 2024-02-01
 
@@ -63,6 +89,7 @@ def connexion_mongodb():
     #####client = MongoClient('mongodb://localhost:27017/')
     #####utilisation de la variable d'environnement si définie
     client = MongoClient(MONGO_URI)
+    #client = connect_to_mongodb_with_retry(MONGO_URI)
 
     #####Sélectionnez la base de données
     #####Elle sera créée si elle n'existe pas lors de la première insertion.
@@ -134,11 +161,11 @@ def main_migration_run():
         #Votre logique de transformation : nettoyage, doublons, etc.
         data_healthcare = suppression_doublons(data_healthcare)
         data_healthcare = gestion_valeurs_manquantes(data_healthcare)
-        
-        
+              
         #2. Insertion dans MongoDB
         #assignation des variables
         db, client, patients_collection = connexion_mongodb()
+        
         #Insertion de data_healthcare dans mongodb ligne par ligne
         #Appliquer la transformation à toutes les lignes pour obtenir la liste des documents de data_healthcare
         mongo_documents = [transform_row_to_document(row) for index, row in data_healthcare.iterrows()]
@@ -163,7 +190,11 @@ def main_migration_run():
         print("Migration terminée.")
     except FileNotFoundError as e:
         print(f"Échec de la migration: {e}")
-        # Optionnel: sys.exit(1)
+        # Ne pas oublier de fermer le client si nécessaire
+        if 'client' in locals() and client:
+            client.close()
+        # Optionnel: 
+        sys.exit(1)
 
 #Le code n'est exécuté que si le fichier est lancé directement
 if __name__ == "__main__":
