@@ -69,7 +69,7 @@ La migration suit trois étapes atomiques :
         ]
     }
     return document
-
+### Version graphe
 PATIENT (Document Racine)
 ├── nom (String)
 ├── age (Integer/Null)
