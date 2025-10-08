@@ -23,7 +23,7 @@ from datetime import datetime
 import pandas as pd
 ####Pour l'utilisation de poetry : cette assertion est fausse : 
 ####quelque soit le type d'environnement personnel de développement du développeur
-####les fichiers .py sont les même
+####les fichiers .py sont les mêmes
 ####l'enjeux est dans dockerfile et dockercompose
 from pymongo import MongoClient
 

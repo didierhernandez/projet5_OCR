@@ -36,20 +36,61 @@ La migration suit trois étapes atomiques :
 
 ✅ Partie 3 : Schéma MongoDB
 
-## 🗃️ Schéma de la Base MongoDB
+## 🗃️ Schéma NoSQL de la Base MongoDB
+### JSON/BSON
+    document = {
+        "nom": row['Name'],
+        "age": int(row['Age']) if row['Age'] is not None else None,
+        "genre": row['Gender'],
+        "groupe_sanguin": row['Blood Type'],
+        
+        "hospitalisations": [
+            {
+                "date_admission": date_admission,
+                "date_sortie": date_discharge,
+                "motif_medical": row['Medical Condition'],
+                "docteur_traitant": row['Doctor'],
+                "hopital": row['Hospital'],
+                "chambre": row['Room Number'],
+                "type_admission": row['Admission Type'],
+                
+                "facturation": {
+                    "assureur": row['Insurance Provider'],
+                    #Conversion en float pour 'Billing Amount'
+                    "montant": float(row['Billing Amount']) if row['Billing Amount'] is not None else None,
+                },
+                "traitement": [
+                    {
+                        "medicament": row['Medication'],
+                        "resultat_test": row['Test Results']
+                    }
+                ]
+            }
+        ]
+    }
+    return document
 
-
-{
-  "_id": ObjectId,
-  "patient_id": String,
-  "age": Integer,
-  "gender": String,
-  "diagnosis": String,
-  "treatment": String,
-  "admission_date": Date,
-  "discharge_date": Date
-}
-
+PATIENT (Document Racine)
+├── nom (String)
+├── age (Integer/Null)
+├── genre (String)
+├── groupe_sanguin (String)
+└── hospitalisations (Array de Documents) 
+    └── [0] (Document d'Hospitalisation)
+        ├── date_admission (Date BSON/Null)
+        ├── date_sortie (Date BSON/Null)
+        ├── motif_medical (String)
+        ├── docteur_traitant (String)
+        ├── hopital (String)
+        ├── chambre (String)
+        ├── type_admission (String)
+        ├── facturation (Document Imbriqué)
+        │   ├── assureur (String)
+        │   └── montant (Float/Null)
+        └── traitement (Array de Documents)
+            └── [0] (Document de Traitement)
+                ├── medicament (String)
+                └── resultat_test (String)
 ### ✅ Partie 4 : Authentification et Rôles Utilisateurs
 
 ```markdown

@@ -11,8 +11,11 @@ import os
 ####les fichiers .py sont les mêmes
 ####l'enjeux est dans dockerfile et dockercompose
 from pymongo import MongoClient
+#Pour pouvoir utiliser les blocs try...except pour distinguer les échecs liés 
+#à la connectivité de ceux liés à l'authentification ou aux opérations de base de données.
 from pymongo.errors import OperationFailure, ConnectionFailure 
 
+'''#fonction non utilisée
 def connect_to_mongodb_with_retry(uri, max_retries=10, delay_seconds=5):
     """Tente de se connecter et de s'authentifier à MongoDB avec des réessais."""
     for attempt in range(max_retries):
@@ -32,6 +35,7 @@ def connect_to_mongodb_with_retry(uri, max_retries=10, delay_seconds=5):
                 raise Exception(f"Échec de l'authentification : {e}")
             time.sleep(delay_seconds)
     return None
+'''
 
 #paramètres : Chemin dans le conteneur à gérer différemment !!!!!!!!!!!!
 #DATA_PATH = "/P5_data/healthcare_dataset.csv" # Chemin dans le conteneur à gérer différemment !!!!!!!!!!!!
