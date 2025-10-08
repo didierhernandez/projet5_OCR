@@ -1,4 +1,3 @@
-### Dokerfile avec pip d'après Copilot
 #Dokerfile avec PIP d'après Copilot à partir de la version avec Poetry
 #Utilise une image Python officielle récente et légère
 FROM python:3.13-slim
