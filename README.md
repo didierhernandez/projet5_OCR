@@ -1,6 +1,5 @@
 # Guide d’Utilisation
 
-```markdown
 ## 🚀 Guide d'Utilisation rapide
 
 ### ✅ Prérequis
