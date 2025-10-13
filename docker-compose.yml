@@ -52,6 +52,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    # AJOUTER CES DEUX LIGNES POUR MAINTENIR LE CONTENEUR ACTIF
+    stdin_open: true # Ouvre le STDIN (pour permettre l'interaction)
+    tty: true        # Alloue un pseudo-TTY (pour forcer le conteneur à rester actif)
+    #Définie le nom du conteneur dans docker associé à l'image construite précédemment
     container_name: migration_app
     #Le conteneur ne se relance pas après l'exécution du script de migration
     restart: "no"
@@ -80,11 +84,15 @@ services:
       - ./P5_data:/data
             
     #Exécute la commande par défaut de l'image (CMD du Dockerfile)
-    command: ["python", "P5_sources_pytest/migration_script.py"]
+    #command: ["python", "P5_sources_pytest/migration_script.py"]
     #Exécute la commande par défaut de l'image (CMD du Dockerfile) avec 10 secondes de décalage 
     #suite à problèmes d'authentification lors du lancement de l'app
     #command: ["sh", "-c", "sleep 30 && python P5_sources_pytest/migration_script.py"]
 
+    # Si la CMD de votre Dockerfile n'est pas déjà 'sleep infinity', 
+    # vous pouvez la définir explicitement pour garantir l'état Running :
+    command: ["sleep", "infinity"]
+    
     #définition du réseaux local virtuel Docker utilisé
     networks:
       - mongo_network

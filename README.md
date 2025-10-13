@@ -1,3 +1,34 @@
+# Guide d’Utilisation
+
+```markdown
+## 🚀 Guide d'Utilisation rapide
+
+### ✅ Prérequis
+- Docker & Docker Compose installés
+- Fichier CSV placé dans `P5_data/healthcare_dataset.csv`
+
+### ▶️ Lancer la migration
+
+1) création du contexte de migration et le container "migration_app" dans l'état "Running", sans que le script de migration soit exécuté  :
+```bash 
+docker compose up -d --build app 
+docker compose up -d mongo-express
+```
+2) une fois le contexte créé précédemment, exécution du script de migration autant de fois que l'on veut :
+```bash
+docker exec migration_app python P5_sources_pytest/migration_script.py
+```
+3) pour arrêter le projet et nettoyages (optionnel) :
+```bash
+docker compose down -v
+```
+___________________________________________________________________________
+> pour récupérer de l'espace disque (optionnel) :
+
+```bash
+docker system prune
+```
+
 📄 Partie 1 : En-tête et Objectifs
 # 📦 Projet de Migration de Données Médicales vers MongoDB
 
@@ -10,6 +41,7 @@ Ce projet vise à migrer un jeu de données médicales (au format CSV) vers une 
 - Migrer les données médicales vers MongoDB
 - Conteneuriser MongoDB et le script de migration avec Docker
 - Automatiser le processus via `docker-compose`
+
 
 ⚙️ Partie 2 : Architecture Technique
 
@@ -75,8 +107,8 @@ PATIENT (Document Racine)
 ├── age (Integer/Null)
 ├── genre (String)
 ├── groupe_sanguin (String)
-└── hospitalisations (Array de Documents) 
-│   └── [0] (Document d'Hospitalisation)
+├── hospitalisations (Array de Documents) 
+│   ├── [0] (Document d'Hospitalisation)
 │   │   ├── date_admission (Date BSON/Null)
         ├── date_sortie (Date BSON/Null)
         ├── motif_medical (String)
@@ -112,25 +144,6 @@ analyst : accès en lecture seule
 
 
 Les rôles peuvent être créés via un script d'initialisation MongoDB ou manuellement via mongosh.
-
-### ✅ Partie 5 : Guide d’Utilisation
-
-```markdown
-## 🚀 Guide d'Utilisation
-
-### ✅ Prérequis
-- Docker & Docker Compose installés
-- Fichier CSV placé dans `P5_data/healthcare_dataset.csv`
-
-### ▶️ Lancer la migration
-
-```bash
-docker compose up --build app
-
-🧹 Nettoyage (optionnel)
-
-docker compose down
-docker volume rm p5_docker_mongo_data
 
 ### ✅ Partie 6 : Structure du Projet
 
