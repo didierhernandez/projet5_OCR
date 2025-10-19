@@ -34,16 +34,22 @@ docker system prune
 ```
 ## Structure du Projet
 
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── init-mongo.js
-├── P5_sources_pytest/
-│   ├── migration_script.py
-│   └── test_migration.py
-├── P5_data/
-│   └── healthcare_dataset.csv
-└── README.md
+Dockerfile
+
+docker-compose.yml
+
+requirements.txt
+
+init-mongo.js
+P5_sources_pytest/
+
+> migration_script.py
+> test_migration.py
+
+P5_data/
+> healthcare_dataset.csv
+
+README.md
 
 ## Logique de fonctionnement détaillé
 
@@ -109,29 +115,6 @@ La migration suit trois étapes atomiques :
         ]
     }
     return document
-    
-### Version graphe
-PATIENT (Document Racine)
-├── nom (String)
-├── age (Integer/Null)
-├── genre (String)
-├── groupe_sanguin (String)
-├── hospitalisations (Array de Documents) 
-│   ├── [0] (Document d'Hospitalisation)
-│   │   ├── date_admission (Date BSON/Null)
-        ├── date_sortie (Date BSON/Null)
-        ├── motif_medical (String)
-        ├── docteur_traitant (String)
-        ├── hopital (String)
-        ├── chambre (String)
-        ├── type_admission (String)
-        ├── facturation (Document Imbriqué)
-        │   ├── assureur (String)
-        │   └── montant (Float/Null)
-        └── traitement (Array de Documents)
-            └── [0] (Document de Traitement)
-                ├── medicament (String)
-                └── resultat_test (String)
 
 ## Authentification et Rôles Utilisateurs
 
