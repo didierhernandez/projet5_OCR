@@ -128,6 +128,6 @@ Authentification dans `docker-compose.yml` :
 #### Rôles Utilisateurs 
 Rôles dans `init-mongo.js` :
 
-data_migrator : accès en lecture/écriture à la base médicale `test2`
-analyst : accès en lecture seule à la base médicale `test2`
+- data_migrator : accès en lecture/écriture à la base médicale `test2`
+- analyst : accès en lecture seule à la base médicale `test2`
 
